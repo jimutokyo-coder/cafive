@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="ja" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAFIVE株式会社 | AI時代の集客を、もっとオモシロく、もっと確実に。</title>
+    
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Noto Sans JP"', 'sans-serif'],
+                        display: ['"Syne"', 'sans-serif'],
+                    },
+                    colors: {
+                        neonCyan: '#00f2ff',
+                        neonPink: '#ff00ff',
+                        darkSlate: '#0f172a',
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { background-color: #f8fafc; color: #1e293b; overflow-x: hidden; cursor: none; }
+        .text-neon-gradient {
+            background: linear-gradient(135deg, #00f2ff 0%, #ff00ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .bg-neon-gradient {
+            background: linear-gradient(135deg, #00f2ff 0%, #ff00ff 100%);
+        }
+        .reveal { opacity: 0; transform: translateY(30px); transition: all 0.8s ease-out; }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+        
+        /* ヒーロー専用の登場アニメーション (Blurry fade-in) */
+        @keyframes blurryFadeIn {
+            0% { opacity: 0; filter: blur(20px); transform: scale(1.05); }
+            100% { opacity: 1; filter: blur(0); transform: scale(1); }
+        }
+        .animate-hero-text {
+            opacity: 0;
+            animation: blurryFadeIn 1.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        .delay-1 { animation-delay: 0.2s; }
+        .delay-2 { animation-delay: 0.5s; }
+        .delay-3 { animation-delay: 0.8s; }
+        .delay-4 { animation-delay: 1.2s; }
+
+        .blob-shape {
+            border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%;
+            overflow: hidden;
+            border: 4px solid transparent;
+            background-image: linear-gradient(#fff, #fff), linear-gradient(135deg, #00f2ff, #ff00ff);
+            background-origin: border-box;
+            background-clip: content-box, border-box;
+            transition: all 0.5s ease;
+        }
+
+        /* マウスストーカー */
+        #cursor {
+            width: 24px;
+            height: 24px;
+            background: rgba(0, 242, 255, 0.3);
+            border: 1px solid rgba(0, 242, 255, 0.5);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            top: 0;
+            left: 0;
+            transition: transform 0.1s ease-out, background 0.3s ease, width 0.3s ease, height 0.3s ease;
+            mix-blend-mode: multiply;
+        }
+        #cursor.hovering {
+            background: rgba(255, 0, 255, 0.4);
+            border-color: rgba(255, 0, 255, 0.8);
+            width: 56px;
+            height: 56px;
+        }
+
+        /* ビジョン画像ホバー仕様 */
+        .vision-img {
+            filter: grayscale(100%);
+            opacity: 0.8;
+            transition: all 0.6s ease;
+        }
+        .blob-shape:hover .vision-img {
+            filter: grayscale(0%);
+            opacity: 1;
+            transform: scale(1.05);
+        }
+
+        /* ヒーロー文言の強制三行維持 */
+        .hero-title {
+            white-space: nowrap;
+        }
+        @media (max-width: 1024px) {
+            .hero-title {
+                white-space: normal;
+            }
+        }
+
+        /* ヒーロー背景キャンバス */
+        #hero-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div id="cursor"></div>
+
+    <!-- Header -->
+    <header class="fixed w-full top-0 z-50 py-6 transition-all" id="nav">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-3 cursor-pointer clickable" onclick="window.scrollTo(0,0)">
+                    <div class="w-10 h-10 rounded-xl bg-neon-gradient flex items-center justify-center text-white">
+                        <span class="font-display text-xl">C</span>
+                    </div>
+                    <span class="font-display text-2xl tracking-tighter text-darkSlate">CAFIVE</span>
+                </div>
+                <nav class="hidden md:flex items-center gap-10">
+                    <a href="#vision" class="text-sm font-bold hover:text-neonPink clickable">Vision</a>
+                    <a href="#service" class="text-sm font-bold hover:text-neonCyan clickable">Service</a>
+                    <a href="#company" class="text-sm font-bold hover:text-neonPink clickable">Company</a>
+                    <a href="#contact" class="px-6 py-2 rounded-full border border-darkSlate font-bold text-sm hover:bg-darkSlate hover:text-white transition-all clickable">Contact</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero -->
+    <section class="min-h-screen flex items-center pt-20 relative overflow-hidden bg-white">
+        <!-- 背景キャンバス -->
+        <canvas id="hero-canvas"></canvas>
+        
+        <!-- 背景装飾のぼかし光 -->
+        <div class="absolute inset-0 z-0">
+            <div class="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-neonCyan/5 rounded-full blur-[120px]"></div>
+            <div class="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-neonPink/5 rounded-full blur-[120px]"></div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-6 w-full relative z-10 text-center">
+            <!-- ヒーロー文言 -->
+            <div class="flex flex-col items-center">
+                <h1 class="hero-title text-5xl md:text-[5rem] lg:text-[6rem] font-black text-darkSlate leading-[1.1] mb-10 tracking-tighter">
+                    <span class="block animate-hero-text delay-1">AI時代の集客を、</span>
+                    <span class="block animate-hero-text delay-2 text-neon-gradient">もっとオモシロく、</span>
+                    <span class="block animate-hero-text delay-3">もっと確実に。</span>
+                </h1>
+                <p class="animate-hero-text delay-4 text-slate-500 text-lg md:text-xl font-medium leading-relaxed mb-12 max-w-2xl mx-auto">
+                    Googleの「AI検索」に対応する、最先端の集客ソリューションを提供。<br>
+                    複雑なAIアルゴリズムへの最適化から店舗運営の効率化まで。
+                </p>
+                <div class="animate-hero-text delay-4 flex justify-center">
+                    <a href="#contact" class="inline-flex items-center gap-3 bg-darkSlate text-white px-10 py-6 rounded-2xl font-bold text-xl hover:bg-slate-800 transition-all shadow-2xl clickable">
+                        無料診断を依頼する
+                        <i class="fa-solid fa-arrow-right text-neonCyan"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section: Vision -->
+    <section id="vision" class="py-40 bg-white">
+        <div class="max-w-7xl mx-auto px-6 grid md:grid-cols-2 items-center gap-24">
+            <div class="reveal">
+                <div class="blob-shape aspect-square w-full max-w-lg bg-slate-100 flex items-center justify-center overflow-hidden clickable">
+                    <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80&w=800" alt="Meeting" class="vision-img w-full h-full object-cover">
+                </div>
+            </div>
+            <div class="reveal">
+                <h2 class="text-5xl md:text-6xl font-black text-darkSlate mb-10 leading-tight">
+                    お客様の<br>
+                    「現在地」を<br>
+                    正確に捉える。
+                </h2>
+                <p class="text-slate-600 text-xl leading-relaxed mb-10 font-medium">
+                    私たちは単なるツールの提供者ではありません。2012年の創業以来培ってきたWeb集客のノウハウをベースに、貴社が現在のデジタル市場でどのような評価を受けているかを調査しお伝えします。
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services -->
+    <section id="service" class="py-40 bg-slate-50">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-24 reveal">
+                <h2 class="text-4xl md:text-5xl font-black text-darkSlate mb-6 tracking-tight">Our Business</h2>
+                <p class="text-slate-500 text-xl font-medium max-w-2xl mx-auto">
+                    AIとデータを駆使し、複雑化するデジタル領域での課題を解決。<br>
+                    持続的な成長を実現するための3つのコア事業を展開しています。
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-12">
+                <div class="bg-white p-12 rounded-[3rem] shadow-sm hover:shadow-2xl transition-all reveal clickable group">
+                    <div class="w-20 h-20 rounded-3xl bg-slate-50 flex items-center justify-center text-neonCyan text-4xl mb-10 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-microchip"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-6">AI集客最適化事業</h3>
+                    <p class="text-slate-500 leading-relaxed font-medium">Google AI Overviews等のAI検索に対応. 情報を同期し、AIからの評価を高め、提案の上位化を実現します。</p>
+                </div>
+                <div class="bg-white p-12 rounded-[3rem] shadow-sm hover:shadow-2xl transition-all reveal clickable group" style="transition-delay: 0.1s">
+                    <div class="w-20 h-20 rounded-3xl bg-slate-50 flex items-center justify-center text-neonPink text-4xl mb-10 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-chart-line"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-6">Webコンサルティング</h3>
+                    <p class="text-slate-500 leading-relaxed font-medium">データに裏打ちされた戦略を立案。媒体運用の最適化から流入後の成約率向上まで並走します。</p>
+                </div>
+                <div class="bg-white p-12 rounded-[3rem] shadow-sm hover:shadow-2xl transition-all reveal clickable group" style="transition-delay: 0.2s">
+                    <div class="w-20 h-20 rounded-3xl bg-slate-50 flex items-center justify-center text-neonCyan text-4xl mb-10 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-rocket"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-6">店舗DX支援事業</h3>
+                    <p class="text-slate-500 leading-relaxed font-medium">SNS投稿の自動化やAIによる口コミ対応を実現。現場の負担を減らし売上に集中できる環境を整えます。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Company -->
+    <section id="company" class="py-40 bg-white">
+        <div class="max-w-4xl mx-auto px-6">
+            <h2 class="text-5xl font-black text-darkSlate mb-20 text-center">会社概要</h2>
+            <div class="bg-white rounded-[3rem] p-12 md:p-20 shadow-xl border border-slate-50 reveal relative overflow-hidden">
+                <div class="absolute left-0 top-0 w-2 h-full bg-neon-gradient"></div>
+                <div class="space-y-10">
+                    <div class="flex flex-col md:flex-row gap-4 border-b border-slate-50 pb-8">
+                        <dt class="md:w-1/3 text-slate-400 font-bold uppercase tracking-widest text-sm">Company Name</dt>
+                        <dd class="md:w-2/3 text-darkSlate font-bold text-xl">CAFIVE株式会社 (CAFIVE Co., Ltd.)</dd>
+                    </div>
+                    <div class="flex flex-col md:flex-row gap-4 border-b border-slate-50 pb-8">
+                        <dt class="md:w-1/3 text-slate-400 font-bold uppercase tracking-widest text-sm">CEO</dt>
+                        <dd class="md:w-2/3 text-darkSlate font-bold text-xl">野口 俊一</dd>
+                    </div>
+                    <div class="flex flex-col md:flex-row gap-4 border-b border-slate-50 pb-8">
+                        <dt class="md:w-1/3 text-slate-400 font-bold uppercase tracking-widest text-sm">Founded</dt>
+                        <dd class="md:w-2/3 text-darkSlate font-bold text-xl">2012年10月15日</dd>
+                    </div>
+                    <div class="flex flex-col md:flex-row gap-4 border-b border-slate-50 pb-8">
+                        <dt class="md:w-1/3 text-slate-400 font-bold uppercase tracking-widest text-sm">Location</dt>
+                        <dd class="md:w-2/3 text-darkSlate font-bold text-lg">
+                            <p class="mb-4">【東京オフィス】<br>〒160-0023 東京都新宿区西新宿7丁目7番29号 7-7-29 西新宿ビル8F</p>
+                            <p>【大阪オフィス】<br>〒550-0014 大阪府大阪市西区区北堀江1丁目1番24号 四ツ橋近商ビル5F</p>
+                        </dd>
+                    </div>
+                    <div class="flex flex-col md:flex-row gap-4 border-b border-slate-50 pb-8">
+                        <dt class="md:w-1/3 text-slate-400 font-bold uppercase tracking-widest text-sm">Services</dt>
+                        <dd class="md:w-2/3 text-darkSlate font-bold text-lg">
+                            <ul class="space-y-2">
+                                <li>・AI集客最適化ソリューションの提供</li>
+                                <li>・Webマーケティングコンサルティング</li>
+                                <li>・店舗向けDX支援</li>
+                            </ul>
+                        </dd>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact -->
+    <section id="contact" class="py-40 bg-darkSlate text-white relative">
+        <div class="max-w-4xl mx-auto px-6 relative z-10">
+            <div class="text-center mb-24 reveal">
+                <h2 class="text-6xl md:text-8xl font-display text-neonCyan mb-8">CONTACT.</h2>
+                <p class="text-slate-400 text-xl">発展を加速させる、最適なAI集客プランをご提案します。</p>
+            </div>
+
+            <!-- Form modified to handle submission via JS -->
+            <form id="contactForm" class="space-y-16 max-w-2xl mx-auto reveal">
+                <div class="border-b-2 border-slate-700 pb-4 focus-within:border-neonCyan transition-all">
+                    <label class="text-xs text-slate-500 uppercase tracking-widest font-bold block mb-4">Company / Shop Name</label>
+                    <input type="text" name="company" required placeholder="株式会社〇〇" class="w-full bg-transparent border-none p-0 text-2xl focus:ring-0 placeholder:text-slate-800 font-bold text-white">
+                </div>
+                <div class="border-b-2 border-slate-700 pb-4 focus-within:border-neonCyan transition-all">
+                    <label class="text-xs text-slate-500 uppercase tracking-widest font-bold block mb-4">Email Address</label>
+                    <input type="email" name="email" required placeholder="contact@cafive.jp" class="w-full bg-transparent border-none p-0 text-2xl focus:ring-0 placeholder:text-slate-800 font-bold text-white">
+                </div>
+                <div class="border-b-2 border-slate-700 pb-4 focus-within:border-neonCyan transition-all">
+                    <label class="text-xs text-slate-500 uppercase tracking-widest font-bold block mb-4">Message</label>
+                    <textarea name="message" required rows="1" placeholder="AI集客について、無料診断希望など" class="w-full bg-transparent border-none p-0 text-2xl focus:ring-0 placeholder:text-slate-800 font-bold resize-none text-white"></textarea>
+                </div>
+                
+                <div id="submitContainer">
+                    <button type="submit" id="submitBtn" class="w-full bg-neon-gradient py-8 rounded-[2rem] text-darkSlate font-black text-2xl hover:scale-[1.02] active:scale-95 transition-all shadow-2xl clickable">
+                        送信する
+                    </button>
+                </div>
+                <p id="successMessage" class="hidden text-neonCyan text-center font-bold text-xl animate-pulse">
+                    <i class="fa-solid fa-check-circle mr-2"></i> お問い合わせを受け付けました。
+                </p>
+            </form>
+        </div>
+    </section>
+
+    <script>
+        // お問い合わせフォームの送信処理
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            const success = document.getElementById('successMessage');
+            
+            // 送信中アニメーション
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> 送信中...';
+            btn.style.opacity = '0.7';
+            btn.disabled = true;
+
+            // 送信完了のシミュレーション（実際はここにAPI連携を記述可能）
+            setTimeout(() => {
+                btn.parentElement.classList.add('hidden');
+                success.classList.remove('hidden');
+                this.reset();
+            }, 1500);
+        });
+
+        // ヒーロー背景アニメーション
+        const canvas = document.getElementById('hero-canvas');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+        let particles = [];
+        let time = 0;
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            initParticles();
+        }
+
+        class Particle {
+            constructor() {
+                this.init();
+            }
+            init() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.size = Math.random() * 8 + 4;
+                this.speedX = Math.random() * 0.4 - 0.2;
+                this.speedY = Math.random() * 0.4 - 0.2;
+                this.opacity = Math.random() * 0.3 + 0.1;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.x > width + 20) this.x = -20;
+                if (this.x < -20) this.x = width + 20;
+                if (this.y > height + 20) this.y = -20;
+                if (this.y < -20) this.y = height + 20;
+            }
+            draw() {
+                ctx.fillStyle = `rgba(0, 242, 255, ${this.opacity})`;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            particles = [];
+            const count = Math.floor(width / 15);
+            for (let i = 0; i < count; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        function drawWave(index, amplitude, frequency, speed, opacity) {
+            ctx.beginPath();
+            const gradient = ctx.createLinearGradient(0, 0, width, 0);
+            gradient.addColorStop(0, `rgba(0, 242, 255, ${opacity})`);
+            gradient.addColorStop(1, `rgba(255, 0, 255, ${opacity})`);
+            
+            ctx.fillStyle = gradient;
+            const yBase = height * 0.65;
+            ctx.moveTo(0, height);
+            for (let x = 0; x <= width; x += 10) {
+                const y = Math.sin(x * frequency + time * speed + index) * amplitude + yBase;
+                ctx.lineTo(x, y);
+            }
+            ctx.lineTo(width, height);
+            ctx.lineTo(0, height);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        function animate() {
+            time += 0.01;
+            ctx.clearRect(0, 0, width, height);
+            drawWave(1, 40, 0.002, 1.2, 0.03);
+            drawWave(2, 60, 0.0015, 0.8, 0.02);
+            drawWave(3, 30, 0.003, 1.5, 0.04);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animate);
+        }
+
+        window.addEventListener('resize', resize);
+        resize();
+        animate();
+
+        // マウスストーカー
+        const cursor = document.getElementById('cursor');
+        let mouseX = 0, mouseY = 0, cursorX = 0, cursorY = 0;
+        document.addEventListener('mousemove', (e) => { mouseX = e.clientX; mouseY = e.clientY; });
+        function animateCursor() {
+            let dx = mouseX - cursorX;
+            let dy = mouseY - cursorY;
+            const isHovering = cursor.classList.contains('hovering');
+            const size = isHovering ? 56 : 24;
+            cursorX += dx * 0.15; cursorY += dy * 0.15;
+            cursor.style.transform = `translate(${cursorX - size/2}px, ${cursorY - size/2}px)`;
+            requestAnimationFrame(animateCursor);
+        }
+        animateCursor();
+
+        const interactiveElements = document.querySelectorAll('.clickable, a, button, input, textarea');
+        interactiveElements.forEach(el => {
+            el.addEventListener('mouseenter', () => cursor.classList.add('hovering'));
+            el.addEventListener('mouseleave', () => cursor.classList.remove('hovering'));
+        });
+
+        // スクロール制御
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) entry.target.classList.add('active');
+            });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+        window.onscroll = () => {
+            const nav = document.getElementById('nav');
+            if (window.scrollY > 50) {
+                nav.classList.add('bg-white/90', 'backdrop-blur-xl', 'py-4', 'shadow-lg');
+            } else {
+                nav.classList.remove('bg-white/90', 'backdrop-blur-xl', 'py-4', 'shadow-lg');
+            }
+        };
+    </script>
+</body>
+</html>
